@@ -14,7 +14,6 @@ export class CdkWordcountStack extends cdk.Stack {
 
     const restapi = new api.RestApi(this, 'wc-api', {
         cloudWatchRole: true,
-        parameters: { para: 'foobar' },
         deployOptions: { stageName: 'dev' }
     });
 
@@ -70,26 +69,39 @@ export class CdkWordcountStack extends cdk.Stack {
     });
     modifyTableRole.addManagedPolicy(IAM.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole"));
 
-    const globalTable = new dynamodb.Table(this, 'wc-table', {
+    const countTable = new dynamodb.Table(this, 'wc-table', {
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
-    globalTable.grantReadWriteData(modifyTableRole);
+    countTable.grantReadWriteData(modifyTableRole);
 
-    const lambdaFunction = new lambda.Function(this, 'wc-lambda', {
+    const wordCountFunction = new lambda.Function(this, 'wc-wordCountFunction', {
       runtime: lambda.Runtime.PYTHON_3_11,
       memorySize: 1024,
       timeout: cdk.Duration.seconds(5),
       handler: 'wordcount.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '/../lambda/wordcount')),
       environment: {
-        dbTable: globalTable.tableName
+        dbTable: countTable.tableName
       },
       role: modifyTableRole
     });
 
-    lambdaFunction.addEventSource(new eventsources.SqsEventSource(queue));
+    wordCountFunction.addEventSource(new eventsources.SqsEventSource(queue));
 
+    const wordResultFunction = new lambda.Function(this, 'wc-wordResultFunction', {
+      runtime: lambda.Runtime.PYTHON_3_11,
+      memorySize: 1024,
+      timeout: cdk.Duration.seconds(5),
+      handler: 'wordresult.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, '/../lambda/wordresult')),
+      environment: {
+        dbTable: countTable.tableName
+      },
+      role: modifyTableRole
+    });
+
+    restapi.root.resourceForPath('result').addMethod('GET', new api.LambdaIntegration(wordResultFunction));
   }
 }

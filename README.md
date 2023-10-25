@@ -9,6 +9,9 @@ Send words with
 Display table with
 `aws dynamodb scan --table-name <table name>`
 
+Display results with
+`curl https://<apigateway endpoint>/result`
+
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 

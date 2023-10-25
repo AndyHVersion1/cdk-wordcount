@@ -1,6 +1,14 @@
-# Welcome to your CDK TypeScript project
+# Word Count
 
-This is a blank project for CDK development with TypeScript.
+Send the endpoint a word and count how many times each word has been received
+in a dynamodb table.
+
+Send words with
+`curl https://<apigateway endpoint>/wc --json '{"word":"brown"}'`
+
+Display table with
+`aws dynamodb scan --table-name <table name>`
+
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 

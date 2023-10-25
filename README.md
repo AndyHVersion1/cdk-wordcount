@@ -1,7 +1,15 @@
 # Word Count
 
+## Learning about AWS serverless
+
 Send the endpoint a word and count how many times each word has been received
 in a dynamodb table.
+
+The demos use of:
+* CDK
+* Api Gateway
+* SQS
+* Lambda
 
 Send words with
 `curl https://<apigateway endpoint>/wc --json '{"word":"brown"}'`
@@ -12,6 +20,7 @@ Display table with
 Display results with
 `curl https://<apigateway endpoint>/result`
 
+---
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
